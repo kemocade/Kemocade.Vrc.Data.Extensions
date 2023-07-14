@@ -1,0 +1,87 @@
+name: Build Repo Listing
+
+env:
+  CurrentPackageName: com.kemocade.vrc.data.extensions
+  listPublishDirectory: Website
+  pathToCi: ci
+  
+on: 
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Build Release]
+    types:
+      - completed
+  release:
+     types: [published, created, edited, unpublished, deleted, released]
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:      
+  build-listing:
+    name: build-listing
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Local Repo
+        uses: actions/checkout@v3 # check out this repo
+
+      - name: Checkout VCC Repo
+        uses: actions/checkout@v3
+        with:
+          repository: kemocade/Kemocade.Vrc.Vcc
+          path: Kemocade.Vrc.Vcc
+          clean: false
+
+      - name: Checkout Automation Repo
+        uses: actions/checkout@v3
+        with:
+          repository: vrchat-community/package-list-action
+          path: ${{env.pathToCi}}
+          clean: false # otherwise the local repo will no longer be checked out
+
+      - name: Copy Website Dir to workspace
+        run: cp -r Kemocade.Vrc.Vcc/Website Website
+      
+      - uses: robinraju/release-downloader@v1.8
+        with:
+          latest: true
+          fileName: "coverage.zip"          
+          extract: true
+          # eg: out-file-path: "my-downloads" => It will create directory $GITHUB_WORKSPACE/my-downloads
+          out-file-path: "Website/coverage"
+
+      - name: Restore Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{env.pathToCi}}/.nuke/temp
+            ~/.nuget/packages
+          key: ${{ runner.os }}-${{ hashFiles('**/global.json', '**/*.csproj') }}
+          
+      - name: Build Package Version Listing
+        run: ${{env.pathToCi}}/build.cmd BuildRepoListing --root ${{env.pathToCi}} --list-publish-directory $GITHUB_WORKSPACE/${{env.listPublishDirectory}} --current-package-name ${{env.CurrentPackageName}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ${{env.listPublishDirectory}}
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

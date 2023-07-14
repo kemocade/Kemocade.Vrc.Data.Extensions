@@ -1,0 +1,8 @@
+# Ignore everything by default
+/*
+
+!.github/
+!Packages/
+!.gitignore
+!LICENSE
+!README.md

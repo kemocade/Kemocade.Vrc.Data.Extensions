@@ -1,0 +1,15 @@
+{
+    "name": "Kemocade.Vrc.Data.Extensions",
+    "references": [
+        "VRC.SDK3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

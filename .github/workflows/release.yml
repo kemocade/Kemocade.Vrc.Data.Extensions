@@ -1,0 +1,116 @@
+﻿name: Build Release
+
+on: 
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [Packages/com.kemocade.vrc.data.extensions/package.json]
+
+env:
+  packageName: "com.kemocade.vrc.data.extensions"
+  unityVersion: 2019.4.31f1
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Checkout VCC Repo
+        uses: actions/checkout@v3
+        with:
+          repository: kemocade/Kemocade.Vrc.Vcc
+          path: Kemocade.Vrc.Vcc
+          clean: false
+
+      - name: Create Test Project
+        run: |
+          mkdir CodeCoverage
+          mkdir TestProject
+          mkdir TestProject/Assets
+          mkdir TestProject/Packages
+          cp Kemocade.Vrc.Vcc/manifest.json TestProject/Packages/manifest.json
+          cp -r Packages/${{env.packageName}} TestProject/Assets
+
+      - name: Cache Library
+        uses: actions/cache@v3
+        with:
+          path: TestProject/Library
+          key: library-${{ runner.os }}-${{ env.unityVersion }}
+
+      - name: Download & Extract VRC Packages
+        run: |
+          curl -LO https://github.com/vrchat/packages/releases/download/3.2.1/com.vrchat.base-3.2.1.zip
+          curl -LO https://github.com/vrchat/packages/releases/download/3.2.1/com.vrchat.worlds-3.2.1.zip
+          unzip com.vrchat.base-3.2.1.zip -d TestProject/Packages/com.vrchat.base
+          unzip com.vrchat.worlds-3.2.1.zip -d TestProject/Packages/com.vrchat.worlds
+
+      - name: Test Runner
+        id: test
+        uses: game-ci/unity-test-runner@v2.2.0
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: TestProject
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          unityVersion: ${{ env.unityVersion }}
+          testMode: EditMode
+          customParameters: -nographics -assemblyNames "Kemocade.Vrc.Data.Extensions.Tests"
+          coverageOptions: 'generateBadgeReport;generateHtmlReport;assemblyFilters:+Kemocade.Vrc.Data.Extensions'
+
+      - name: Enforce Code Coverage
+        uses: AnImaginedReality/UnityCodeCoverage.Action@v0.0.4
+        with:
+          required-coverage: 100
+          coverage-file-path: ${{ steps.test.outputs.coveragePath }}/Report/Summary.xml
+
+      - name: Copy README and LICENSE to Package
+        run: |
+          cp README.md Packages/${{env.packageName}}/README.md
+          cp LICENSE Packages/${{env.packageName}}/LICENSE
+
+      # VRChat Template Release Script
+      - name: get version
+        id: version
+        uses: notiz-dev/github-action-json-property@7c8cf5cc36eb85d8d287a8086a39dac59628eb31
+        with: 
+            path: "Packages/${{env.packageName}}/package.json"
+            prop_path: "version"
+    
+      - name: Set Environment Variables
+        run: |
+          echo "zipFile=${{ env.packageName }}-${{ steps.version.outputs.prop }}".zip >> $GITHUB_ENV
+          echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV
+        
+      - name: Create Zip
+        uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
+        with:
+          type: "zip"
+          directory: "Packages/${{env.packageName}}/"
+          filename: "../../${{env.zipFile}}" # make the zip file two directories up, since we start two directories in above
+      
+      - name: Create Coverage Zip
+        run: zip -j coverage.zip ${{ steps.test.outputs.coveragePath }}/Report/*
+          
+      - run: find "Packages/${{env.packageName}}/" -name \*.meta >> metaList
+          
+      - name: Create UnityPackage
+        uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
+        with:
+          package-path: ${{ env.unityPackage }}
+          include-files: metaList
+          
+      - name: Make Release
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        with:
+          tag_name: ${{ steps.version.outputs.prop }}
+          files: |
+            ${{ env.zipFile }}
+            ${{ env.unityPackage }}
+            Packages/${{ env.packageName }}/package.json
+            coverage.zip
