@@ -338,7 +338,7 @@ inputStringList.Add("b");
 inputStringList.Add("c");
 inputStringList.TryCastArray(out string[] outputStringArray);
 ```
-This will assign `output` a value of `["a", "b", "c"]`.
+This will result in a `string[]` value of `["a", "b", "c"]`.
 
 # FAQs
 
