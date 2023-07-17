@@ -1,7 +1,7 @@
 {
   "name": "com.kemocade.vrc.data.extensions",
   "displayName": "Kemocade VRC Data Extensions",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extensions for VRChat Data Objects",
   "vpmDependencies": {
     "com.vrchat.udonsharp": "^1.1.8"

@@ -1,4 +1,6 @@
-﻿namespace Kemocade.Vrc.Data.Extensions
+﻿using VRC.Core;
+
+namespace Kemocade.Vrc.Data.Extensions
 {
     public static partial class DataDictionaryExtensions
     {

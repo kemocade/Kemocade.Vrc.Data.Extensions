@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using VRC.SDK3.Data;
 using static NUnit.Framework.Assert;
 
 namespace Kemocade.Vrc.Data.Extensions.Tests

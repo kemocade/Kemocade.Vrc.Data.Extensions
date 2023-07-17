@@ -7,7 +7,7 @@ namespace Kemocade.Vrc.Data.Extensions.Tests
     public static partial class DataListExtensions
     {
         [Test]
-        public static void TryCastAll() =>
+        public static void TryCastArray() =>
             True
             (
                 new DataList(1, 2, 3).TryCastArray(out int[] output) &&

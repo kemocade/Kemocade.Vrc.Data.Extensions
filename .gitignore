@@ -3,6 +3,8 @@
 
 !.github/
 !Packages/
+Packages/*
+!Packages/com.kemocade.vrc.data.extensions
 !.gitignore
 !LICENSE
 !README.md

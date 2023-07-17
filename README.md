@@ -340,6 +340,20 @@ inputStringList.TryCastArray(out string[] outputStringArray);
 ```
 This will result in a `string[]` value of `["a", "b", "c"]`.
 
+# Unsafe Mode
+
+Many of the extensions methods in this package start with the prefix `Try`.
+This indicates that the extensions will fail gracefully by returning `false` if something goes wrong, such as an invalid cast or a missing property key.
+However, this safety forces the actual return value of the extensions to be a `bool` that indicates failure or success, while the actual result is returned via an `out` parameter.
+This is not always ideal, so many of these `Try` methods also come in an unsafe variant.
+These unsafe variants return the desired value directly and do not return a success or failure indicator.
+For example, `TryCastArray` can be replaced with `CastArray`.
+
+These unsafe variants will force a [DivideByZeroException](https://learn.microsoft.com/en-us/dotnet/api/system.dividebyzeroexception) to be thrown in the event of an error.
+This will exception will cause the script that triggered it to stop executing, so these unsafe variants should only be used in situations where you are sure of the structure of the data you are working with.
+
+(The `DivideByZeroException` type does not have any particular significance here, it was just chosen because U# does not support throwing exceptions manually.)
+
 # FAQs
 
 ## Why should I use this package?
@@ -461,7 +475,9 @@ These tests are run automatically by GitHub Actions and verified before a packag
 | **Extension** | **Parameters** | **Returns** |
 | - | - | - |
 | [TryGetValue](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/TryGetValue.cs)`<T>` | `string key`, `out T result` | `bool` |
-| [TryGetValues](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/TryGetValues.cs)`<T>` | `string key`, `out T result` | `bool` |
+| [GetValue](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/GetValue.cs)`<T>` | `string key` | `T` |
+| [TryGetValues](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/TryGetValues.cs)`<T>` | `string key`, `out T[] result` | `bool` |
+| [GetValues](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/GetValues.cs)`<T>` | `string key` | `T[]` |
 | [TryGetValueToken](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/TryGetValueToken.cs) | `string key`, `out DataToken result` | `bool` |
 | [WhereValueEquals](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/WhereValueEquals.cs)`<T>` | `string key`, `T target`, `char split = '.'` | `DataDictionary[]` |
 | [WhereValueDoesNotEqual](Packages/com.kemocade.vrc.data.extensions/Runtime/DataDictionaryExtensions/WhereValueDoesNotEqual.cs)`<T>` | `string key`, `T target`, `char split = '.'` | `DataDictionary[]` |
@@ -477,9 +493,12 @@ These tests are run automatically by GitHub Actions and verified before a packag
 | **Extension** | **Parameters** | **Returns** |
 | - | - | - |
 | [TryCastArray](Packages/com.kemocade.vrc.data.extensions/Runtime/DataListExtensions/TryCastArray.cs)`<T>` | `out T[] result` | `bool` |
+| [CastArray](Packages/com.kemocade.vrc.data.extensions/Runtime/DataListExtensions/CastArray.cs)`<T>` || `out T[]` |
 
 ## DataToken Extensions
 | **Extension** | **Parameters** | **Returns** |
 | - | - | - |
 | [TryCast](Packages/com.kemocade.vrc.data.extensions/Runtime/DataTokenExtensions/TryCast.cs)`<T>` | `out T result` | `bool` |
-| [TryCastArray](Packages/com.kemocade.vrc.data.extensions/Runtime/DataTokenExtensions/TryCastArray.cs)`<T>` | `string key`, `out T[] result` | `bool` |
+| [Cast](Packages/com.kemocade.vrc.data.extensions/Runtime/DataTokenExtensions/Cast.cs)`<T>` || `T` |
+| [TryCastArray](Packages/com.kemocade.vrc.data.extensions/Runtime/DataTokenExtensions/TryCastArray.cs)`<T>` | `out T[] result` | `bool` |
+| [CastArray](Packages/com.kemocade.vrc.data.extensions/Runtime/DataTokenExtensions/CastArray.cs)`<T>` || `T[]` |
