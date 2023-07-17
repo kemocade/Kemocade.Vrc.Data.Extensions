@@ -344,13 +344,13 @@ This will result in a `string[]` value of `["a", "b", "c"]`.
 
 Many of the extensions methods in this package start with the prefix `Try`.
 This indicates that the extensions will fail gracefully by returning `false` if something goes wrong, such as an invalid cast or a missing property key.
-However, this safety forces the actual return value of the extensions to be a `bool` that indicates failure or success, while the actual result is returned via an `out` parameter.
+However, this safety forces the return value of the extensions to be a `bool` that indicates failure or success, while the actual result is returned via an `out` parameter.
 This is not always ideal, so many of these `Try` methods also come in an unsafe variant.
 These unsafe variants return the desired value directly and do not return a success or failure indicator.
 For example, `TryCastArray` can be replaced with `CastArray`.
 
 These unsafe variants will force a [DivideByZeroException](https://learn.microsoft.com/en-us/dotnet/api/system.dividebyzeroexception) to be thrown in the event of an error.
-This will exception will cause the script that triggered it to stop executing, so these unsafe variants should only be used in situations where you are sure of the structure of the data you are working with.
+This will cause the script that triggered it to stop executing, so these unsafe variants should only be used in situations where you are sure of the structure of the data you are working with.
 
 (The `DivideByZeroException` type does not have any particular significance here, it was just chosen because U# does not support throwing exceptions manually.)
 
