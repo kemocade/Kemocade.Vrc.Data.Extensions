@@ -91,6 +91,12 @@ jobs:
           directory: "Packages/${{env.packageName}}/"
           filename: "../../${{env.zipFile}}" # make the zip file two directories up, since we start two directories in above
       
+      - name: Debug Log
+        run: ls
+
+      - name: Debug Log 2
+        run: ls ${{ steps.test.outputs.coveragePath }}
+
       - name: Create Coverage Zip
         run: zip -j coverage.zip ${{ steps.test.outputs.coveragePath }}/Report/*
           
