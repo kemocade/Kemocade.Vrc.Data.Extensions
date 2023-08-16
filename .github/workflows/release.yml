@@ -2,9 +2,6 @@
 
 on: 
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: [Packages/com.kemocade.vrc.data.extensions/package.json]
 
 env:
   packageName: "com.kemocade.vrc.data.extensions"
